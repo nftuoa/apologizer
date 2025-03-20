@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>道歉信生成器</title>
+    <style>
+        body {
+            font-family: "微软雅黑", Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #output {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>道歉信生成器</h2>
+        <form id="apologyForm">
+            道歉人姓名：<input type="text" id="apologizer" placeholder="请输入你的姓名"><br>
+            学号：<input type="text" id="studentId" placeholder="请输入学号"><br>
+            被抄袭人姓名：<input type="text" id="copied" placeholder="请输入被抄袭人姓名"><br>
+            <button type="submit">生成道歉信</button>
+        </form>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        document.getElementById('apologyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 获取表单数据
+            const apologizer = document.getElementById('apologizer').value || "田谨睿";
+            const studentId = document.getElementById('studentId').value || "2451328";
+            const copied = document.getElementById('copied').value || "朱瑞泽";
+            
+            // 原始模板（根据用户提供的文本）
+            const template = `沈坚老师你好，我是学号${studentId}的${apologizer}，真的非常对不起，这次的高程作业我抄袭了同寝室的${copied}同学的作业，因为我上课不专心听讲，也没有关注群里的消息，所以我甚至不知道有程序编写的作业要完成，快到截止日期的时候，看见没写的作业，我感到十分慌张，所以去求我认识的人把作业给我抄。本来他们没人会给我看的，但是我不断摇晃别人的胳膊，一直在别人身边说话，才使得寝室里的${copied}同学把他的作业给了我。我知道抄袭和被抄袭的后果都十分严重，但是我因为懒散，明知故犯。我对于自己不认真学习，临时进行抄袭的行为感到非常后悔，都是因为我学习态度不端正，做事不认真才会出现这种情况。我心甘情愿接受老师的一切惩罚，并且保证自己以后独立完成学校的各项作业。和我同寝室的${copied}同学，他并没有自愿给出作业，而是在我的软磨硬泡之下才无可奈何地把作业给我抄。恳求老师能对${copied}同学手下留情，我对抄袭作业这件事负全部责任，我自愿把对${copied}同学的一切惩罚转移到我头上。都是因为我的错才让${copied}同学蒙受冤屈。我今后一定改过自新，重新审视自己对待学习的态度，上课一定专心听讲。绝对不会再抄任何人的作业。真的非常非常对不起。`;
+            
+            // 显示生成结果
+            document.getElementById('output').textContent = template;
+        });
+    </script>
+</body>
+</html>
