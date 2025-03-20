@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>道歉信生成器</title>
+    <title>多模板道歉信生成器</title>
     <style>
         body {
             font-family: "微软雅黑", Arial, sans-serif;
-            max-width: 800px;
+            max-width: 960px;
             margin: 50px auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -17,7 +17,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        input[type="text"] {
+        input, select {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -43,11 +43,22 @@
 </head>
 <body>
     <div class="container">
-        <h2>道歉信生成器</h2>
+        <h2>多模板道歉信生成器</h2>
         <form id="apologyForm">
-            道歉人姓名：<input type="text" id="apologizer" placeholder="请输入你的姓名"><br>
-            学号：<input type="text" id="studentId" placeholder="请输入学号"><br>
-            被抄袭人姓名：<input type="text" id="copied" placeholder="请输入被抄袭人姓名"><br>
+            选择模板：
+            <select id="templateSelector">
+                <option value="0">模板0：（原始版）</option>
+                <option value="1">模板1：（Dev/VS问题）</option>
+                <option value="2">模板2：（室友抄袭）</option>
+                <option value="3">模板3：（被抄袭者道歉）</option>
+                <option value="4">模板4：（变量名修改）</option>
+                <option value="5">模板5：（提供代码）</option>
+            </select>
+            
+            道歉人姓名：<input type="text" id="apologizer" placeholder="请输入你的姓名">
+            学号：<input type="text" id="studentId" placeholder="请输入学号">
+            被抄袭人/涉及人：<input type="text" id="copied" placeholder="请输入涉及人姓名">
+            
             <button type="submit">生成道歉信</button>
         </form>
 
@@ -55,19 +66,41 @@
     </div>
 
     <script>
-        document.getElementById('apologyForm').addEventListener('submit', function(e) {
+        // 扩展模板库，整合原始模板 [[4]][[5]]
+        const templates = {
+            0: `沈坚老师你好，我是学号{{studentId}}的{{apologizer}}，真的非常对不起，这次的高程作业我抄袭了同寝室的{{copied}}同学的作业，因为我上课不专心听讲，也没有关注群里的消息，所以我甚至不知道有程序编写的作业要完成，快到截止日期的时候，看见没写的作业，我感到十分慌张，所以去求我认识的人把作业给我抄。本来他们没人会给我看的，但是我不断摇晃别人的胳膊，一直在别人身边说话，才使得寝室里的{{copied}}同学把他的作业给了我。我知道抄袭和被抄袭的后果都十分严重，但是我因为懒散，明知故犯。我对于自己不认真学习，临时进行抄袭的行为感到非常后悔，都是因为我学习态度不端正，做事不认真才会出现这种情况。我心甘情愿接受老师的一切惩罚，并且保证自己以后独立完成学校的各项作业。和我同寝室的{{copied}}同学，他并没有自愿给出作业，而是在我的软磨硬泡之下才无可奈何地把作业给我抄。恳求老师能对{{copied}}同学手下留情，我对抄袭作业这件事负全部责任，我自愿把对{{copied}}同学的一切惩罚转移到我头上。都是因为我的错才让{{copied}}同学蒙受冤曲。我今后一定改过自新，重新审视自己对待学习的态度，上课一定专心听讲。绝对不会再抄任何人的作业。真的非常非常对不起。`,
+            
+            1: `沈坚老师好，我是{{studentId}} {{apologizer}}，我为自己在3月19号晚11点的作弊行为深刻道歉，因为自己编写的分解浮点数程序在Dev上运行成功而在VS上提示错误，在与舍友讨论很久后仍得不到解决，害怕在ddl前完不成作业，于是便在网上搜到了作业答案。答案中有些函数我并没有学过且不理解，但在时间紧张的情况下，我直接使用了答案中的代码。\n我深知自己不诚信的行为，在了解后果的情况下明知故犯，甘愿受罚，承担相应后果，并对自己进行深刻反省，今后杜绝该类一切行为，坚守学术诚信。恳请老师再给我一次机会，我也愿意接受任何惩罚，绝无二话。`,
+            
+            2: `沈坚老师您好，我是{{apologizer}}，学号{{studentId}}，由于我平时学习不认真，导致我对高程仍然不是很了解。因此在做作业的时候经常感到困惑，效率十分低下，从而在ddl的那一天尚未完成所有作业，但由于想完成作业的心理作祟，于是便存有侥幸向室友{{copied}}同学要了他的作业来顶替我没有完成的作业。我知道老师您布置作业是为了让我们能更好的掌握高程知识，可我的这种行为却远远违背了您的用意，也同时违背了学术诚信。经过这一次错误后，我深刻反思自己，并且已经知晓了事情的严重性。我为自己的行为感到非常抱歉，我保证在接下来的学习中不再犯下如此错误，并好好学习高程，提高效率，不再需要通过抄袭同学的作业来完成作业。\n再次表示深深的歉意。希望老师您能高抬贵手，手下留情，给我们一次机会。恳求您能原谅我们。`,
+            
+            3: `沈坚老师您好！\n我是{{studentId}}{{apologizer}}同学，是这位{{copied}}同学的室友，在3.19晚22：30左右借给了{{copied}}同学自己的代码作业，对于此次学术不端行为我深感抱歉和愧疚。\n作为学生，我知道学术诚信的重要性，即使知道对{{copied}}同学来说作业比较困难，在最开始还是拒绝了室友的请求。然而最后一天我却没能坚守本心，抱着侥幸的心理，还是借给了{{copied}}同学作业，没有做好对室友同学的监督义务。\n我深知自己的行为是对同学的不负责，也是对自己的不负责，我深知改错比犯错更为重要，身为高校学子，更应履行这一点，应保证不再犯错误。\n我愿意承担此次错误的后果，也恳求老师能知道我的歉意，再给我们一个机会，也保证在接下来秉持学术诚信的原则，不抄袭，不让别人抄袭，并监督{{copied}}同学在接下来的学习，不会再让这种事情发生；并怀着虚心学习的态度，认真思考和求教程序设计。\n再次向您表示深深的歉意。`,
+            
+            4: `沈坚老师好，我是{{apologizer}}，学号{{studentId}}，由于我平时学习不认真，上课未认真听讲，导致在ddl当天还未完成编码的作业，但是内心又想提交作业，所以抄袭了同学{{copied}}的代码，并想隐瞒过去，所以将代码中的变量名更改就交了上去。我深刻反思了自己，并且意识到了这件事情的严重性，经过这一次的错误后，我一定会改头换面，重新做人，在下一次的作业中独立自主的完成，并且重新完成编码作业。最后再次表示深深歉意，也向同学{{copied}}表示歉意，不应该为了要到代码答案而老是骚扰他，对此深表歉意。我愿意承担此次抄袭的后果，任何惩罚都可以接受，绝无二话，也希望老师给一次机会，高抬贵手。恳请您的原谅。`,
+            
+            5: `沈坚老师您好，我是{{apologizer}}同学学号 {{studentId}}，我在 3/19 日将我的高程程序发给了我的同学。我一开始想要拒绝，但考虑到我朋友时间紧迫，便心软将程序发给了他，我的本意是教给他我的想法与思路和解决类似代码问题的方法，但是我没有意识到这一举动已严重违反了学术诚信与道德，违反了最基本的规则。我当时对此没有足够清晰的认知，没有以一个严肃的态度去对待这个最为严肃的底线问题，我对此感到深深的忏悔😭这是对我的作业成功的不负责，更是对其他所有同学的不负责，更是对老师您的不尊重。我深刻地意识到了自己的问题，往后一定以最为严肃的态度对待此事绝不越过红线不将自己的成功发给别人，对高程，对老师给予最基本的尊重。针对此次错误我甘愿接受一切惩罚。往后再遇到此类事情我一定通过解答问题的方式来实现共同进步，而非一错再错。我一定知错就改，希望老师您能高抬贵手放过我这一次😭🥹🥹我再次向您和同学们表达我深深的歉意。`
+        };
+        
+
+document.getElementById('apologyForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             // 获取表单数据
-            const apologizer = document.getElementById('apologizer').value || "田谨睿";
-            const studentId = document.getElementById('studentId').value || "2451328";
-            const copied = document.getElementById('copied').value || "朱瑞泽";
+            const templateId = document.getElementById('templateSelector').value;
+            const apologizer = document.getElementById('apologizer').value || "佚名";
+            const studentId = document.getElementById('studentId').value || "0000000";
+            const copied = document.getElementById('copied').value || "某同学";
             
-            // 原始模板（根据用户提供的文本）
-            const template = `沈坚老师你好，我是学号${studentId}的${apologizer}，真的非常对不起，这次的高程作业我抄袭了同寝室的${copied}同学的作业，因为我上课不专心听讲，也没有关注群里的消息，所以我甚至不知道有程序编写的作业要完成，快到截止日期的时候，看见没写的作业，我感到十分慌张，所以去求我认识的人把作业给我抄。本来他们没人会给我看的，但是我不断摇晃别人的胳膊，一直在别人身边说话，才使得寝室里的${copied}同学把他的作业给了我。我知道抄袭和被抄袭的后果都十分严重，但是我因为懒散，明知故犯。我对于自己不认真学习，临时进行抄袭的行为感到非常后悔，都是因为我学习态度不端正，做事不认真才会出现这种情况。我心甘情愿接受老师的一切惩罚，并且保证自己以后独立完成学校的各项作业。和我同寝室的${copied}同学，他并没有自愿给出作业，而是在我的软磨硬泡之下才无可奈何地把作业给我抄。恳求老师能对${copied}同学手下留情，我对抄袭作业这件事负全部责任，我自愿把对${copied}同学的一切惩罚转移到我头上。都是因为我的错才让${copied}同学蒙受冤屈。我今后一定改过自新，重新审视自己对待学习的态度，上课一定专心听讲。绝对不会再抄任何人的作业。真的非常非常对不起。`;
+            // 获取对应模板 [[3]]
+            let content = templates[templateId];
+            
+            // 动态替换占位符 [[9]][[10]]
+            content = content.replace(/{{apologizer}}/g, apologizer)
+                             .replace(/{{studentId}}/g, studentId)
+                             .replace(/{{copied}}/g, copied);
             
             // 显示生成结果
-            document.getElementById('output').textContent = template;
+            document.getElementById('output').textContent = content;
         });
     </script>
 </body>
